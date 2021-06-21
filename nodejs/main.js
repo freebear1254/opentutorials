@@ -1,7 +1,6 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
-const { findSourceMap } = require('module');
 
 var app = http.createServer(function (request, response) {
   const _url = request.url;
@@ -19,7 +18,7 @@ var app = http.createServer(function (request, response) {
       fs.readdir(`./data`, (err, fileName) => {
         let fileList = '';
         for (i = 0; i < fileName.length; i++) {
-          fileList = fileList + `<li><a href = '/?${fileName[i]}'>${fileName[i]}</a></li>`
+          fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
         }
         
         templete = `
