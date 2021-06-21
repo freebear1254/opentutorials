@@ -1,0 +1,63 @@
+body {
+    margin: 0;
+}
+
+h1 {
+    border-bottom: 5px solid gray;
+    text-align: center;
+    margin: 0;
+    padding:20px;
+}
+a{
+    cursor: pointer;
+    text-decoration: none;    
+}
+a:visited {
+    text-decoration: none;  
+    color : black;
+}
+
+#grind ol {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 35px;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    border-bottom: 3px solid black;
+}
+
+
+.article {
+    
+    padding-left: 20px;
+    border-left: 1px solid black;
+}
+
+.night{
+    background-color: black;
+    color: white;
+}
+.night a {
+    color : yellow;
+}
+.btn{
+    background-color: cornflowerblue;
+    width: 150px;
+    height: 30px;
+    border: none;
+    float: right;
+    cursor: pointer;
+}
+
+@media(max-width : 800px){
+    #grid{
+        display :block;
+    }
+    .article{
+        border-left: none;
+    }
+}
