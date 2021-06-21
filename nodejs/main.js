@@ -1,46 +1,56 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
-
-
+const { findSourceMap } = require('module');
 
 var app = http.createServer(function (request, response) {
-  var _url = request.url;
-  var queryData = url.parse(_url, true).query;
-  var title = queryData.id;
+  const _url = request.url;
+  const queryData = url.parse(_url, true).query;
+  const pathName = url.parse(_url, true).pathname;
+  let title = queryData.id;
+  ;
 
-  
-  if (_url == '/') {
-    title = 'Welcome';
-  }
-  if (_url == '/favicon.ico') {
-    return response.writeHead(404);
-  }
-  response.writeHead(200);
-  let templete;
-  fs.readFile(`data/${title}`, `utf8`, function (err, data) {
-    templete = `
-    <!doctype html>
-    <html>
-    <head>
-      <title>${title}</title>
-      <meta charset="utf-8">
-    </head>
-    <body>
-      <h1><a href="/">${title}</a></h1>
-      <ol>
-        <li><a href="/?id=html">HTML</a></li>
-        <li><a href="/?id=css">CSS</a></li>
-        <li><a href="/?id=javascript">JavaScript</a></li>
-      </ol>
-      <h2>${title}</h2>
-      <p>${data}</p>
-    </body>
-    </html>        
-    `
-    response.end(templete);
-  });
+  if (pathName === '/') {
+    fs.readFile(`data/${title}`, `utf8`, function (err, data) {
+      if (title === undefined) {
+        title = "Welcome";
+        data = "Hello Node.js"
+      }
+      fs.readdir(`./data`, (err, fileName) => {
+        let fileList = '';
+        for (i = 0; i < fileName.length; i++) {
+          fileList = fileList + `<li><a href = '/?${fileName[i]}'>${fileName[i]}</a></li>`
+        }
+        
+        templete = `
+        <!doctype html>
+        <html>
+        <head>
+        <title>${title}</title>
+        <meta charset="utf-8">
+        </head>
+        <body>
+        <h1><a href="/">${title}</a></h1>
+        <ol>
+        ${fileList}
+        </ol>
+        <h2>${title}</h2>
+        <p>${data}</p>
+        </body>
+        </html>        
+        `;
+        response.writeHead(200);
+        response.end(templete);
+      });
 
+    })
+
+  } else {
+    response.writeHead(404);
+    response.end('Not found');
+  }
 
 });
+
+
 app.listen(3000);
