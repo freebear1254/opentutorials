@@ -28,7 +28,7 @@ var app = http.createServer(function (request, response) {
     </html>        
     `;
     response.writeHead(200);
-    response.end(templete); templet
+    response.end(templete); 
 
   }
 
@@ -44,6 +44,7 @@ var app = http.createServer(function (request, response) {
           fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
         }
         createTemplet(title, data, fileList);
+        response.end(templete); 
       });
     })
 
@@ -77,16 +78,14 @@ var app = http.createServer(function (request, response) {
       title = post.title;
       content = post.content;
 
-      response.end(`title : ${title} // content : ${content}`);
-
+      
       fs.writeFile(`data/${title}`, `${content}`, function (err) {
+        response.writeHead(302,{Location : `/?id=${title}`});
+        response.end(`title : ${title} // content : ${content}`);
         console.log(err);
       })
 
     })
-
-    response.writeHead(200);
-
   }
 
   else {
