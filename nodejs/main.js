@@ -16,9 +16,11 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
-
-
   function createTemplet(title, data, fileList, control) {
+    title = title.replace(/<script>/g,'&lt;script;&gt;');
+    title = title.replace(/<\/script>/g,'&lt;/script;&gt;');
+    data = data.replace(/<\/script>/g,'&lt;/script&gt;');
+    data = data.replace(/<script>/g,'&lt;script&gt;');
     templete = `
     <!doctype html>
     <html>
@@ -38,8 +40,6 @@ var app = http.createServer(function (request, response) {
     </html>        
     `;
     response.writeHead(200);
-
-
   }
 
   if (pathName === '/') {
@@ -146,7 +146,6 @@ var app = http.createServer(function (request, response) {
      });
   }
   else if(pathName === '/delete_process'){   
-
     var body ='';
     request.on('data',function(data){
       body += data;
@@ -161,10 +160,7 @@ var app = http.createServer(function (request, response) {
         response.end();
       });
     })
-
-
   }
-
 
   else {
     response.writeHead(404);
@@ -172,5 +168,4 @@ var app = http.createServer(function (request, response) {
   }
 
 });
-
 app.listen(3000);
