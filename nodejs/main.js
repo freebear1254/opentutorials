@@ -2,6 +2,9 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
+const sanitizeHtml = require('sanitize-html');
+
+
 
 var app = http.createServer(function (request, response) {
   const _url = request.url;
@@ -20,10 +23,14 @@ var app = http.createServer(function (request, response) {
 
   var item = {
     createTemplet: function (title, data, fileList, control) {
-      title = title.replace(/<script>/g, '&lt;script;&gt;');
-      title = title.replace(/<\/script>/g, '&lt;/script;&gt;');
-      data = data.replace(/<\/script>/g, '&lt;/script&gt;');
-      data = data.replace(/<script>/g, '&lt;script&gt;');
+      const sanitizedData = sanitizeHtml(data , {
+        allowedTags : sanitizeHtml.defaults.allowedTags.concat(['form','input','p','textarea']),
+        disallowedTagsMode: 'escape',
+        allowedAttributes:{
+          input : ['type','name','placeholder','value']
+        },
+        selfClosing: [ 'img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
+      });
       templete = `
       <!doctype html>
       <html>
@@ -38,7 +45,7 @@ var app = http.createServer(function (request, response) {
       </ol>        
       ${control}  
       <h2>${title}</h2>
-      <p>${data}</p>
+      <p>${sanitizedData}</p>
       </body>
       </html>        
       `;
