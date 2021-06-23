@@ -20,14 +20,15 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
-
   var item = {
     createTemplet: function (title, data, fileList, control) {
       const sanitizedData = sanitizeHtml(data , {
         allowedTags : sanitizeHtml.defaults.allowedTags.concat(['form','input','p','textarea']),
         disallowedTagsMode: 'escape',
         allowedAttributes:{
-          input : ['type','name','placeholder','value']
+          input : ['type','name','placeholder','value'],
+          form : ['action','method'],
+          textarea : ['placeholder','value','name']
         },
         selfClosing: [ 'img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
       });
@@ -42,7 +43,7 @@ var app = http.createServer(function (request, response) {
       <h1><a href="/">${title}</a></h1>
       <ol>
       ${fileList}
-      </ol>        
+      </ol>         
       ${control}  
       <h2>${title}</h2>
       <p>${sanitizedData}</p>
@@ -83,27 +84,30 @@ var app = http.createServer(function (request, response) {
     <p><input type="submit" value="submit"></p>
     </form>
     `
-    control = "";
+    control = "";    
 
     item.list(title, data, control);
-
   }
   else if (pathName === '/create_process') {
-    var body = '';
-    request.on('data', function (data) {
-      body += data;
-    })
-    let title = '';
-    let content = '';
+    var body='';
 
-    request.on('end', function () {
-      let post = qs.parse(body);
+    request.on('data',function(data){
+      body +=data;
+    });
+    request.on('end',function(){
+      var post = qs.parse(body);
       title = post.title;
       content = post.content;
 
-      item.list(title, data, control);
+      fs.writeFile(`data/${title}`,content, 'utf8', function (error) {      
+        console.log(error);
+        response.writeHead(302,{location : `/?id=${encodeURI(title)}`});
+        response.end('');
+      });
+    });
 
-    })
+    
+
   }
   else if (pathName === '/update') {
 
