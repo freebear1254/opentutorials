@@ -4,8 +4,7 @@ var url = require('url');
 var qs = require('querystring');
 const sanitizeHtml = require('sanitize-html');
 
-
-
+const item = require(`./lib/templete.js`);
 var app = http.createServer(function (request, response) {
   const _url = request.url;
   const queryData = url.parse(_url, true).query;
@@ -20,60 +19,22 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
-  var item = {
-    createTemplet: function (title, data, fileList, control) {
-      const sanitizedData = sanitizeHtml(data , {
-        allowedTags : sanitizeHtml.defaults.allowedTags.concat(['form','input','p','textarea']),
-        disallowedTagsMode: 'escape',
-        allowedAttributes:{
-          input : ['type','name','placeholder','value'],
-          form : ['action','method'],
-          textarea : ['placeholder','value','name']
-        },
-        selfClosing: [ 'img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
-      });
-      templete = `
-      <!doctype html>
-      <html>
-      <head>
-      <title>${title}</title>
-      <meta charset="utf-8">
-      </head>
-      <body>
-      <h1><a href="/">${title}</a></h1>
-      <ol>
-      ${fileList}
-      </ol>         
-      ${control}  
-      <h2>${title}</h2>
-      <p>${sanitizedData}</p>
-      </body>
-      </html>        
-      `;
-      response.writeHead(200);
-    },
-    list: function (title, data, control) {
-      fs.readdir(`./data`, (err, fileName) => {
-        let fileList = '';
-        for (i = 0; i < fileName.length; i++) {
-          fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
-        }
-        this.createTemplet(title, data, fileList, control);
-        response.end(templete);
-      });
-    },
-
-  }
+ 
   if (pathName === '/') {
-    fs.readFile(`data/${title}`, `utf8`, function (err, data) {
-      control = update;
-      if (title === undefined) {
-        title = "Welcome";
-        data = `"Hello Node.js"`
-        control = create;
-      }
-      item.list(title, data, control);
-    })
+    fs.readdir(`./data`, function (error, fileName) {
+      fs.readFile(`data/${title}`, `utf8`, function (err, data) {
+        control = update;
+        if (title === undefined) {
+          title = "Welcome";
+          data = `"Hello Node.js"`
+          control = create;
+        }
+        var fileList = item.list(fileName);
+        var html = item.createTemplet(title, data, fileList, control);
+        response.writeHead(200);
+        response.end(html);
+      });
+    });
   }
   else if (pathName === '/create') {
     title = "Create";
@@ -84,30 +45,32 @@ var app = http.createServer(function (request, response) {
     <p><input type="submit" value="submit"></p>
     </form>
     `
-    control = "";    
+    control = "";
+    fs.readdir(`./data`, function (error, fileName) {
 
-    item.list(title, data, control);
+      var fileList = item.list(fileName);
+      var html = item.createTemplet(title, data, fileList, control);
+      response.writeHead(200);
+      response.end(html);
+    })
   }
   else if (pathName === '/create_process') {
-    var body='';
+    var body = '';
 
-    request.on('data',function(data){
-      body +=data;
+    request.on('data', function (data) {
+      body += data;
     });
-    request.on('end',function(){
+    request.on('end', function () {
       var post = qs.parse(body);
       title = post.title;
       content = post.content;
 
-      fs.writeFile(`data/${title}`,content, 'utf8', function (error) {      
+      fs.writeFile(`data/${title}`, content, 'utf8', function (error) {
         console.log(error);
-        response.writeHead(302,{location : `/?id=${encodeURI(title)}`});
+        response.writeHead(302, { location: `/?id=${encodeURI(title)}` });
         response.end('');
       });
     });
-
-    
-
   }
   else if (pathName === '/update') {
 
@@ -160,11 +123,9 @@ var app = http.createServer(function (request, response) {
       });
     })
   }
-
   else {
     response.writeHead(404);
     response.end('Not found');
   }
-
 });
 app.listen(3000);
