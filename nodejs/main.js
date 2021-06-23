@@ -19,7 +19,6 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
- 
   if (pathName === '/') {
     fs.readdir(`./data`, function (error, fileName) {
       fs.readFile(`data/${title}`, `utf8`, function (err, data) {
@@ -73,7 +72,6 @@ var app = http.createServer(function (request, response) {
     });
   }
   else if (pathName === '/update') {
-
     fs.readFile(`data/${title}`, `utf8`, function (err, data) {
       control = '';
       data = `

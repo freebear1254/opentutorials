@@ -1,5 +1,4 @@
-module.exports =  {
-  
+module.exports =  {  
     createTemplet: function (title, data, fileList, control) {
       const sanitizeHtml = require('sanitize-html');
       const sanitizedData = sanitizeHtml(data, {
