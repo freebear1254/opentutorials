@@ -1,13 +1,12 @@
-let args = process.argv;
-console.log(args);
+var mysql = require('mysql');
 
-console.log("A");
-console.log("B");
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "nodejs",
+  password: "sks1254"
+});
 
-if (args[2] === 'hello') {
-    console.log("C1");
-} else {
-    console.log("C2");
-}
-console.log("D");
-console.log("E");
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});

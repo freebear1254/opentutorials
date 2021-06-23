@@ -8,6 +8,7 @@ var app = http.createServer(function (request, response) {
   const queryData = url.parse(_url, true).query;
   const pathName = url.parse(_url, true).pathname;
   let title = queryData.id;
+
   const create = `<a href = "/create">create</a> `;
   const update = `
   <a href = "/update?id=${title}">update</a> 
@@ -16,32 +17,45 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
-  function createTemplet(title, data, fileList, control) {
-    title = title.replace(/<script>/g,'&lt;script;&gt;');
-    title = title.replace(/<\/script>/g,'&lt;/script;&gt;');
-    data = data.replace(/<\/script>/g,'&lt;/script&gt;');
-    data = data.replace(/<script>/g,'&lt;script&gt;');
-    templete = `
-    <!doctype html>
-    <html>
-    <head>
-    <title>${title}</title>
-    <meta charset="utf-8">
-    </head>
-    <body>
-    <h1><a href="/">${title}</a></h1>
-    <ol>
-    ${fileList}
-    </ol>        
-    ${control}  
-    <h2>${title}</h2>
-    <p>${data}</p>
-    </body>
-    </html>        
-    `;
-    response.writeHead(200);
-  }
 
+  var item = {
+    createTemplet: function (title, data, fileList, control) {
+      title = title.replace(/<script>/g, '&lt;script;&gt;');
+      title = title.replace(/<\/script>/g, '&lt;/script;&gt;');
+      data = data.replace(/<\/script>/g, '&lt;/script&gt;');
+      data = data.replace(/<script>/g, '&lt;script&gt;');
+      templete = `
+      <!doctype html>
+      <html>
+      <head>
+      <title>${title}</title>
+      <meta charset="utf-8">
+      </head>
+      <body>
+      <h1><a href="/">${title}</a></h1>
+      <ol>
+      ${fileList}
+      </ol>        
+      ${control}  
+      <h2>${title}</h2>
+      <p>${data}</p>
+      </body>
+      </html>        
+      `;
+      response.writeHead(200);
+    },
+    list: function (title, data, control) {
+      fs.readdir(`./data`, (err, fileName) => {
+        let fileList = '';
+        for (i = 0; i < fileName.length; i++) {
+          fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
+        }
+        this.createTemplet(title, data, fileList, control);
+        response.end(templete);
+      });
+    },
+
+  }
   if (pathName === '/') {
     fs.readFile(`data/${title}`, `utf8`, function (err, data) {
       control = update;
@@ -50,14 +64,7 @@ var app = http.createServer(function (request, response) {
         data = `"Hello Node.js"`
         control = create;
       }
-      fs.readdir(`./data`, (err, fileName) => {
-        let fileList = '';
-        for (i = 0; i < fileName.length; i++) {
-          fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
-        }
-        createTemplet(title, data, fileList, control);
-        response.end(templete);
-      });
+      item.list(title, data, control);
     })
   }
   else if (pathName === '/create') {
@@ -69,15 +76,9 @@ var app = http.createServer(function (request, response) {
     <p><input type="submit" value="submit"></p>
     </form>
     `
-    fs.readdir(`./data`, (err, fileName) => {
-      let fileList = '';
-      control = "";
-      for (i = 0; i < fileName.length; i++) {
-        fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
-      }
-      createTemplet(title, data, fileList, control);
-      response.end(templete);
-    });
+    control = "";
+
+    item.list(title, data, control);
 
   }
   else if (pathName === '/create_process') {
@@ -93,11 +94,7 @@ var app = http.createServer(function (request, response) {
       title = post.title;
       content = post.content;
 
-      fs.writeFile(`data/${title}`, `${content}`, function (err) {
-        response.writeHead(302, { Location: `/?id=${title}` });
-        response.end(`title : ${title} // content : ${content}`);
-        console.log(err);
-      });
+      item.list(title, data, control);
 
     })
   }
@@ -105,7 +102,6 @@ var app = http.createServer(function (request, response) {
 
     fs.readFile(`data/${title}`, `utf8`, function (err, data) {
       control = '';
-
       data = `
     <form action="http://localhost:3000/update_process" method="POST">
     <p><input type="hidden" name="id" id="" value="${title}" ></p>
@@ -114,15 +110,7 @@ var app = http.createServer(function (request, response) {
     <p><input type="submit" value="submit"></p>
     </form>
     `
-      fs.readdir(`./data`, (err, fileName) => {
-        let fileList = '';
-        for (i = 0; i < fileName.length; i++) {
-          fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
-        }
-
-        createTemplet(title, data, fileList, control);
-        response.end(templete);
-      });
+      item.list(title, data, control);
     })
   } else if (pathName === '/update_process') {
     var body = '';
@@ -143,20 +131,20 @@ var app = http.createServer(function (request, response) {
         })
         console.log(err);
       });
-     });
+    });
   }
-  else if(pathName === '/delete_process'){   
-    var body ='';
-    request.on('data',function(data){
+  else if (pathName === '/delete_process') {
+    var body = '';
+    request.on('data', function (data) {
       body += data;
     });
-    request.on('end',function(){
+    request.on('end', function () {
       var post = qs.parse(body);
       var title = post.title;
 
-      fs.unlink(`data/${title}`,function(err){
+      fs.unlink(`data/${title}`, function (err) {
         console.log(err);
-        response.writeHead(302,{location : `/`});
+        response.writeHead(302, { location: `/` });
         response.end();
       });
     })
