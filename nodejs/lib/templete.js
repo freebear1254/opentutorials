@@ -1,5 +1,5 @@
 module.exports =  {  
-    createTemplet: function (title, data, list, control) {
+    createTemplet: function (title, data, list, control,author) {
       const sanitizeHtml = require('sanitize-html');
       const sanitizedData = sanitizeHtml(data, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['form', 'input', 'p', 'textarea']),
@@ -25,6 +25,7 @@ module.exports =  {
       </ol>         
       ${control}  
       <h2>${title}</h2>
+      <p>..by ${author}</p>
       <p>${sanitizedData}</p>
       </body>
       </html>        
