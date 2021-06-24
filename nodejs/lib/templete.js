@@ -1,5 +1,5 @@
 module.exports =  {  
-    createTemplet: function (title, data, fileList, control) {
+    createTemplet: function (title, data, list, control) {
       const sanitizeHtml = require('sanitize-html');
       const sanitizedData = sanitizeHtml(data, {
         allowedTags: sanitizeHtml.defaults.allowedTags.concat(['form', 'input', 'p', 'textarea']),
@@ -19,9 +19,9 @@ module.exports =  {
       <meta charset="utf-8">
       </head>
       <body>
-      <h1><a href="/">${title}</a></h1>
+      <h1><a href="/">Web</a></h1>
       <ol>
-      ${fileList}
+      ${list}
       </ol>         
       ${control}  
       <h2>${title}</h2>
@@ -34,7 +34,7 @@ module.exports =  {
     list: function (fileName) {
       let fileList = '';
       for (i = 0; i < fileName.length; i++) {
-        fileList = fileList + `<li><a href = '/?id=${fileName[i]}'>${fileName[i]}</a></li>`
+        fileList = fileList + `<li><a href = '/?id=${fileName[i].id}'>${fileName[i].title}</a></li>`
       }
       return fileList;
     },

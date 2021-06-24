@@ -2,9 +2,20 @@ var http = require('http');
 var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
-const sanitizeHtml = require('sanitize-html');
-
 const item = require(`./lib/templete.js`);
+
+const mysql = require('mysql');
+let sql = '';
+
+var connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'nodejs',
+  password: 'sks1254',
+  database: 'nodejs'
+});
+connection.connect();
+
+
 var app = http.createServer(function (request, response) {
   const _url = request.url;
   const queryData = url.parse(_url, true).query;
@@ -19,21 +30,37 @@ var app = http.createServer(function (request, response) {
     <input type="submit"  value ="delete">   
 </form>
   `;
+
   if (pathName === '/') {
-    fs.readdir(`./data`, function (error, fileName) {
-      fs.readFile(`data/${title}`, `utf8`, function (err, data) {
-        control = update;
-        if (title === undefined) {
-          title = "Welcome";
-          data = `"Hello Node.js"`
-          control = create;
-        }
-        var fileList = item.list(fileName);
-        var html = item.createTemplet(title, data, fileList, control);
-        response.writeHead(200);
-        response.end(html);
-      });
-    });
+    control = update;
+    var sql = `SELECT * FROM topic`;
+    connection.query(sql, function (err, results) {
+      if (err) {
+        throw err;
+      }
+      else {
+        sql = 'SELECT * FROM topic WHERE id=?'
+        connection.query(sql, [queryData.id], function (err2, topic) {
+          if (err2) {
+            throw err2;
+          }
+          if (title === undefined) {
+            title = "Welcome";
+            data = `"Hello Node.js"`
+            control = create;
+          } else {
+            title = topic[0].title;
+            data = topic[0].description;
+          }
+          var list = item.list(results);
+          var html = item.createTemplet(title, data, list, control);
+          response.writeHead(200);
+          response.end(html);
+        });
+
+      }
+    })
+
   }
   else if (pathName === '/create') {
     title = "Create";
@@ -45,17 +72,16 @@ var app = http.createServer(function (request, response) {
     </form>
     `
     control = "";
-    fs.readdir(`./data`, function (error, fileName) {
-
-      var fileList = item.list(fileName);
-      var html = item.createTemplet(title, data, fileList, control);
+    var sql = `SELECT * FROM topic`;
+    connection.query(sql, function (err, results) {
+      var list = item.list(results);
+      var html = item.createTemplet(title, data, list, control);
       response.writeHead(200);
       response.end(html);
-    })
+    });
   }
   else if (pathName === '/create_process') {
     var body = '';
-
     request.on('data', function (data) {
       body += data;
     });
@@ -64,11 +90,14 @@ var app = http.createServer(function (request, response) {
       title = post.title;
       content = post.content;
 
-      fs.writeFile(`data/${title}`, content, 'utf8', function (error) {
-        console.log(error);
-        response.writeHead(302, { location: `/?id=${encodeURI(title)}` });
-        response.end('');
-      });
+      sql =`INSERT INTO topic (title,description,created,author_id) VALUES (?,?,now(),?)`
+      connection.query(sql,[title,content,1],function(err,results){
+        if(err){
+          throw err;
+        }
+        response.writeHead(302,{location : `/?id=${results.insertId}`});
+        response.end();
+      })
     });
   }
   else if (pathName === '/update') {
