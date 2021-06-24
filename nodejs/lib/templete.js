@@ -27,6 +27,9 @@ module.exports =  {
       <h2>${title}</h2>
       <p>..by ${author}</p>
       <p>${sanitizedData}</p>
+      <div>
+        <a href = "/author">authorList</a>
+      </div>
       </body>
       </html>        
       `;
@@ -39,6 +42,61 @@ module.exports =  {
       }
       return fileList;
     },
+    authorList : function(results){
+      let list = '';
+      for(i=0; i < results.length;i++){
+        list = list +`
+      <tr>
+        <td>${results[i].id}</td>
+        <td>${results[i].name}</td>
+        <td>${results[i].profile}</td>
+        <td>
+          <a href="/update_author?id=${results[i].id}">update</a>
+        </td>
+        <td>
+          <form action="/delete_author" method="post">
+            <input type="hidden" name="id" value="${results[i].id}">
+            <input type="submit" value="Delete">
+          </form>
+        </td>
+      </tr>
+      `
+      };      
+      return list;
+    },
+    authorTemplete : function(list,form){
+      templete=
+      `<!doctype html>
+      <html>
+      <head>
+        <title>web</title>
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB.Home</a></h1>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>name</th>
+              <th>profile</th>
+              <th>update</th>
+              <th>delete</th>
+            </tr>           
+          </thead>
+          <tbody>
+            ${list}
+          </tbody>
+        </table>
+        ${form}
+
+        <div>
+          
+        </div>
+      </body>
+      </html>`
+      return templete;
+    }
   };
 
  

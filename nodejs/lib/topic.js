@@ -106,7 +106,7 @@ exports.update = function (request, response) {
             var title = results[0].title;
             author = results[0].name;
             data = `
-    <form action="http://localhost:3000/update_process" method="POST">
+    <form action="update_process" method="POST">
     <p><input type="hidden" name="id" id="" value="${queryData.id}" ></p>
     <p><input type="text" name="title" id="" placeholder="${title}" value ="${title}"></p>
     <p><textarea name="content" id="" cols="30" rows="10" placeholder="${description}" value="${description}">${description}</textarea></p>
