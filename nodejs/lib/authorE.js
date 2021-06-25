@@ -1,4 +1,3 @@
-var url = require('url');
 var qs = require('querystring');
 var connection = require(`./db`);
 const item = require(`./templeteE.js`);
@@ -28,7 +27,7 @@ exports.update = function (request, response, authorId) {
             throw err;
         }
         sql = `SELECT * FROM author WHERE id = ?`
-        connection.query(sql,[authorId], function (err2, author) {
+        connection.query(sql, [authorId], function (err2, author) {
             if (err2) {
                 throw err2;
             }
@@ -62,8 +61,7 @@ exports.update_process = function (request, response) {
             if (err) {
                 throw err;
             }
-            response.writeHead(302, { location: `/author` });
-            response.end();
+            response.redirect(`/author`);
         });
     });
 }
@@ -92,25 +90,23 @@ exports.create_process = function (request, response) {
         sql = `INSERT INTO author (name,profile) VALUES (?,?)`
         connection.query(sql, [name, profile], function (err, results) {
             if (err) { throw err }
-            response.writeHead(302, { location: `/author` });
-            response.end();
+            response.redirect(`/author`);
         });
     });
 }
-exports.delete = function(request,response){
-    var body ='';
-    request.on(`data`,function(data){
+exports.delete = function (request, response) {
+    var body = '';
+    request.on(`data`, function (data) {
         body += data;
     });
-    request.on(`end`,function(){
+    request.on(`end`, function () {
         post = qs.parse(body);
         var id = post.id;
 
-        sql =`DELETE FROM author WHERE id =?`;
-        connection.query(sql,[id],function(err,results){
-            if(err){throw err}
-            response.writeHead(302, {location : `/author`});
-            response.end();
+        sql = `DELETE FROM author WHERE id =?`;
+        connection.query(sql, [id], function (err, results) {
+            if (err) { throw err }
+            response.redirect(`/author`);
         });
     })
 }

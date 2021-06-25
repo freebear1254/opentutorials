@@ -13,7 +13,7 @@ exports.home = function (request, response) {
 
         title = 'Welcome';
         data = 'Hello World Welcome';
-        
+
         var list = item.list(results);
         var html = item.createTemplet(title, data, list, control, author);
         response.send(html);
@@ -42,7 +42,7 @@ exports.page = function (request, response, pageId) {
                 else {
                     title = topic[0].title;
                     data = topic[0].description;
-                    author =`..by ${topic[0].name}` ;
+                    author = `..by ${topic[0].name}`;
                 }
                 var list = item.list(results);
                 var html = item.createTemplet(title, data, list, control, author);
@@ -64,7 +64,7 @@ exports.create = function (request, response) {
     var sql = `SELECT * FROM topic`;
     connection.query(sql, function (err, results) {
         var list = item.list(results);
-        var html = item.createTemplet(title, data, list, control,author);
+        var html = item.createTemplet(title, data, list, control, author);
         response.send(html);
     });
 }
@@ -83,12 +83,11 @@ exports.create_process = function (request, response) {
             if (err) {
                 throw err;
             }
-            response.writeHead(302, { location: `/?id=${results.insertId}` });
-            response.end();
+            response.redirect(`/page/${results.insertId}`);
         })
     });
 }
-exports.update = function (request, response,pageId) {
+exports.update = function (request, response, pageId) {
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
     let author = ``;
@@ -132,8 +131,7 @@ exports.update_process = function (request, response) {
         sql = `UPDATE topic SET title = ?, description= ? WHERE id=? `;
         connection.query(sql, [title, content, id], function (err, results) {
             if (err) { throw err }
-            response.writeHead(302, { location: `/?id=${id}` });
-            response.end();
+            response.redirect(`/page/${id}`);
         })
     });
 }
@@ -148,8 +146,7 @@ exports.delete_process = function (request, response) {
 
         sql = `DELETE FROM topic WHERE id=?`;
         connection.query(sql, [id], function (err, results) {
-            response.writeHead(302, { location: '/' });
-            response.end();
+            response.redirect(`/`);
         });
     })
 
