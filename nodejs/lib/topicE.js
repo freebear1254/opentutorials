@@ -43,10 +43,12 @@ exports.page = function (request, response, pageId) {
                     title = topic[0].title;
                     data = topic[0].description;
                     author = `..by ${topic[0].name}`;
+
+                    var list = item.list(results);
+                    var html = item.createTemplet(title, data, list, control, author);
+                    response.send(html);
                 }
-                var list = item.list(results);
-                var html = item.createTemplet(title, data, list, control, author);
-                response.send(html)
+
             });
 
         }

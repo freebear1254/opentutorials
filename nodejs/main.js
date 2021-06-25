@@ -9,20 +9,20 @@ app.get(`/`, (request, response) => {
 });
 app.get('/page/:pageId', (request, response) => {
   const pageId = request.params.pageId;
-  topic.page(request, response, pageId);
+  topic.page(request, response, pageId );
 })
 app.get(`/create`, (request, response) => {
   topic.create(request, response);
 });
 app.post(`/create_process`, (request, response) => {
-  topic.create_process(request, response);
+  topic.create_process(request, response );
 });
 app.get(`/update/:pageId`, (request, response) => {
   const pageId = request.params.pageId;
-  topic.update(request, response, pageId);
+  topic.update(request, response, pageId );
 });
 app.post(`/update_process`, (request, response) => {
-  topic.update_process(request, response);
+  topic.update_process(request, response );
 });
 app.post(`/delete_process`, (request, response) => {
   topic.delete_process(request, response);
@@ -31,11 +31,11 @@ app.post(`/delete_process`, (request, response) => {
 
 
 app.get(`/author`, (request, response) => {
-  author.author(request, response);
+  author.author(request, response );
 });
 app.get(`/update_author/:authorId`, (request, response) => {
   const authorId = request.params.authorId;
-  author.update(request, response, authorId);
+  author.update(request, response, authorId );
 })
 app.post(`/author_update_process`, (request, response) => {
   author.update_process(request, response);
@@ -49,6 +49,22 @@ app.post(`/author_create_process`, (request, response) => {
 app.post(`/delete_author`, (request, response) => {
   author.delete(request, response);
 });
+
+
+app.use(function(req,res,next){
+  var script =`
+  <script>
+  alert("We can't found it");
+location.href ='/';
+</script>
+  ` 
+  res.status(404).send(script);
+});
+
+app.use(function(err,req,res,next){
+  console.log(err.stack);
+  res.status(500).send('Something Wrong!!');
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)

@@ -5,11 +5,11 @@ let form = ``;
 let list = ``;
 
 
-exports.author = function (request, response) {
+exports.author = function (request, response ,next) {
     sql = `SELECT * FROM author`;
     connection.query(sql, function (err, results) {
         if (err) {
-            throw err;
+            next(err);
         }
         form = `<a href = "/create_author">CREATE AUTHOR</a>`
         var list = item.authorList(results);
@@ -20,16 +20,16 @@ exports.author = function (request, response) {
     })
 }
 
-exports.update = function (request, response, authorId) {
+exports.update = function (request, response, authorId ,next) {
     sql = `SELECT * FROM author`;
     connection.query(sql, function (err, results) {
         if (err) {
-            throw err;
+            next(err);
         }
         sql = `SELECT * FROM author WHERE id = ?`
         connection.query(sql, [authorId], function (err2, author) {
             if (err2) {
-                throw err2;
+                next(err2);
             }
             form = `
             <form action="/author_update_process" method="POST">
@@ -45,7 +45,7 @@ exports.update = function (request, response, authorId) {
         })
     })
 }
-exports.update_process = function (request, response) {
+exports.update_process = function (request, response , next) {
     var body = ``;
     request.on(`data`, function (data) {
         body += data;
@@ -59,7 +59,7 @@ exports.update_process = function (request, response) {
         sql = `update author SET name =?, profile= ? WHERE id = ? `
         connection.query(sql, [name, profile, id], function (err, results) {
             if (err) {
-                throw err;
+                next(err);
             }
             response.redirect(`/author`);
         });
@@ -77,7 +77,7 @@ exports.create = function (requset, response) {
     response.send(html);
 }
 
-exports.create_process = function (request, response) {
+exports.create_process = function (request, response , next) {
     var body = ``;
     request.on(`data`, function (data) {
         body += data;
@@ -89,12 +89,12 @@ exports.create_process = function (request, response) {
 
         sql = `INSERT INTO author (name,profile) VALUES (?,?)`
         connection.query(sql, [name, profile], function (err, results) {
-            if (err) { throw err }
+            if (err) { next(err); }
             response.redirect(`/author`);
         });
     });
 }
-exports.delete = function (request, response) {
+exports.delete = function (request, response , next) {
     var body = '';
     request.on(`data`, function (data) {
         body += data;
@@ -105,7 +105,7 @@ exports.delete = function (request, response) {
 
         sql = `DELETE FROM author WHERE id =?`;
         connection.query(sql, [id], function (err, results) {
-            if (err) { throw err }
+            if (err) { next(err); }
             response.redirect(`/author`);
         });
     })
