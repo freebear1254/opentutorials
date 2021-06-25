@@ -140,7 +140,6 @@ exports.update_process = function (request, response) {
     });
 }
 exports.delete_process = function (request, response) {
-
     var body = '';
     request.on('data', function (data) {
         body += data;
