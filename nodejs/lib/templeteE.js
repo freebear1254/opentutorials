@@ -1,5 +1,6 @@
 module.exports = {
-  createTemplet: function (title, data, list, control, author) {
+    createTemplet: function (title, data, list, control, author,login) {   
+      
     const sanitizeHtml = require('sanitize-html');
     const sanitizedData = sanitizeHtml(data, {
       allowedTags: sanitizeHtml.defaults.allowedTags.concat(['form', 'input', 'p', 'textarea']),
@@ -11,15 +12,18 @@ module.exports = {
       },
       selfClosing: ['img', 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
     });
-    templete = `
+     templete = `
       <!doctype html>
       <html>
       <head>
       <title>${title}</title>
       <meta charset="utf-8">
       </head>
-      <body>
+      <body>   
       <h1><a href="/">Web</a></h1>
+      <div>
+        ${login}
+      </div>
       <ol>
       ${list}
       </ol>         
@@ -97,5 +101,3 @@ module.exports = {
     return templete;
   }
 };
-
-

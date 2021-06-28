@@ -1,25 +1,43 @@
-var url = require('url');
-var qs = require('querystring');
-var connection = require(`./db`);
+const url = require('url');
+const qs = require('querystring');
+
+const connection = require(`./db`);
 const item = require(`./templeteE.js`);
 let author = ``;
 let control = '';
+let isUser =false;
+
+function getUserName(request,response){      
+    const rs= request.cookies;     
+    if(rs.name){
+        login = `Hello ${rs.name} 
+        <a href = "/logout">Logout</a>
+        ` ;
+        isUser= true;
+    }else {
+        login =`<a href="/login">Login</a>`;
+        isUser = false;
+    }
+    return rs;
+}
 
 exports.home = function (request, response) {
+    getUserName(request,response);   
+    author =``;     
     control = `<a href = "/create">create</a> `;
     var sql = `SELECT * FROM topic`;
     connection.query(sql, (err, results) => {
         if (err) { throw err }
-
         title = 'Welcome';
         data = 'Hello World Welcome';
-
-        var list = item.list(results);
-        var html = item.createTemplet(title, data, list, control, author);
+        var list = item.list(results);       
+        var html = item.createTemplet(title, data, list, control, author ,login);
         response.send(html);
     });
 }
 exports.page = function (request, response, pageId) {
+    const rs = getUserName(request,response);
+    control ='';
     const update = `
     <a href = "/update/${pageId}">update</a> 
     <form action="/delete_process" method="POST">
@@ -27,7 +45,9 @@ exports.page = function (request, response, pageId) {
       <input type="submit"  value ="delete">   
   </form>
     `;
-    control = update;
+    
+
+
     var sql = `SELECT * FROM topic`;
     connection.query(sql, function (err, results) {
         if (err) {
@@ -43,9 +63,14 @@ exports.page = function (request, response, pageId) {
                     title = topic[0].title;
                     data = topic[0].description;
                     author = `..by ${topic[0].name}`;
+                    author_id = topic[0].author_id;
+
+                    if(rs.id === String(author_id)){
+                        control = update;
+                    }
 
                     var list = item.list(results);
-                    var html = item.createTemplet(title, data, list, control, author);
+                    var html = item.createTemplet(title, data, list, control, author ,login);
                     response.send(html);
                 }
 
@@ -55,9 +80,12 @@ exports.page = function (request, response, pageId) {
     })
 }
 exports.create = function (request, response) {
-    title = "Create";
+    const rs = getUserName(request,response); 
+    if(isUser){
+        title = "Create";
     data = `
     <form action="/create_process" method="POST">
+    <input type ="hidden" name="author_id" value ="${rs.id}">
     <p><input type="text" name="title"  placeholder="title" ></p>
     <p><textarea name="content" cols="30" rows="10" placeholder="여기"></textarea></p>
     <p><input type="submit" value="submit"></p>
@@ -66,9 +94,13 @@ exports.create = function (request, response) {
     var sql = `SELECT * FROM topic`;
     connection.query(sql, function (err, results) {
         var list = item.list(results);
-        var html = item.createTemplet(title, data, list, control, author);
+        var html = item.createTemplet(title, data, list, control, author ,login);
         response.send(html);
     });
+    }else{
+        response.redirect(`/login`)
+    }
+    
 }
 exports.create_process = function (request, response) {
     var body = '';
@@ -77,11 +109,12 @@ exports.create_process = function (request, response) {
     });
     request.on('end', function () {
         var post = qs.parse(body);
+        author_id = post.author_id;
         title = post.title;
         content = post.content;
 
         sql = `INSERT INTO topic (title,description,created,author_id) VALUES (?,?,now(),?)`
-        connection.query(sql, [title, content, 1], function (err, results) {
+        connection.query(sql, [title, content, author_id], function (err, results) {
             if (err) {
                 throw err;
             }
@@ -90,6 +123,7 @@ exports.create_process = function (request, response) {
     });
 }
 exports.update = function (request, response, pageId) {
+    getUserName(request,response);
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
     let author = ``;
@@ -113,7 +147,7 @@ exports.update = function (request, response, pageId) {
     <p><input type="submit" value="submit"></p>
     </form>`
             var list = item.list(topics);
-            var html = item.createTemplet(title, data, list, control, author);
+            var html = item.createTemplet(title, data, list, control, author ,login);
             response.send(html);
         });
     });

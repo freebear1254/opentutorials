@@ -68,7 +68,8 @@ exports.update_process = function (request, response , next) {
 exports.create = function (requset, response) {
     form = `
     <form action="/author_create_process" method="POST">
-    <input type="text" name="name" placeholder="name" value =""></br></br>
+    <input type="text" name="name" placeholder="name" value =""></br>
+    <input type="text" name="password" placeholder="password" value =""></br></br>
     <textarea name="profile" placeholder="profile" ></textarea></br>
     <input type="submit" value="Create">
   </form>
@@ -86,9 +87,10 @@ exports.create_process = function (request, response , next) {
         post = qs.parse(body);
         var name = post.name;
         var profile = post.profile;
+        var password = post.password
 
-        sql = `INSERT INTO author (name,profile) VALUES (?,?)`
-        connection.query(sql, [name, profile], function (err, results) {
+        sql = `INSERT INTO author (name,profile,password) VALUES (?,?,?)`
+        connection.query(sql, [name, profile,password], function (err, results) {
             if (err) { next(err); }
             response.redirect(`/author`);
         });

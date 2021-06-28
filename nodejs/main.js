@@ -1,11 +1,16 @@
 const express = require('express')
-const app = express()
-const port = 3000
+const app = express();
+const port = 3000;
 const topic = require(`./lib/topicE`);
 const author = require(`./lib/authorE`);
+const helmet =require('helmet');
+const login= require('./lib/loginE');
+var cookieParser = require('cookie-parser')
+app.use(cookieParser());
 
-app.get(`/`, (request, response) => {
-  topic.home(request, response);
+
+app.get(`/`, (request, response) => {      
+  topic.home(request, response,);
 });
 app.get('/page/:pageId', (request, response) => {
   const pageId = request.params.pageId;
@@ -28,8 +33,6 @@ app.post(`/delete_process`, (request, response) => {
   topic.delete_process(request, response);
 });
 
-
-
 app.get(`/author`, (request, response) => {
   author.author(request, response );
 });
@@ -49,6 +52,16 @@ app.post(`/author_create_process`, (request, response) => {
 app.post(`/delete_author`, (request, response) => {
   author.delete(request, response);
 });
+
+app.get(`/login` , (request,response)=>{
+  login.login(request,response);
+});
+app.post(`/login_process`,(request,response)=>{
+  login.process(request,response);
+});
+app.get(`/logout`,(request,response)=>{
+  login.logout(request,response);
+})
 
 
 app.use(function(req,res,next){
