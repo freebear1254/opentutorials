@@ -1,13 +1,22 @@
-const express = require('express')
+const express = require('express');
 const app = express();
+const parseurl = require('parseurl');
+const session = require('express-session');
+
 const port = 3000;
 const topic = require(`./lib/topicE`);
 const author = require(`./lib/authorE`);
-const helmet =require('helmet');
+//const helmet =require('helmet');
 const login= require('./lib/loginE');
 var cookieParser = require('cookie-parser')
 app.use(cookieParser());
 
+app.use(session({
+  
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+}))
 
 app.get(`/`, (request, response) => {      
   topic.home(request, response,);
@@ -36,7 +45,7 @@ app.post(`/delete_process`, (request, response) => {
 app.get(`/author`, (request, response) => {
   author.author(request, response );
 });
-app.get(`/update_author/:authorId`, (request, response) => {
+app.get(`/upd.ate_author/:authorId`, (request, response) => {
   const authorId = request.params.authorId;
   author.update(request, response, authorId );
 })
@@ -57,7 +66,7 @@ app.get(`/login` , (request,response)=>{
   login.login(request,response);
 });
 app.post(`/login_process`,(request,response)=>{
-  login.process(request,response);
+  login.process(request,response);  
 });
 app.get(`/logout`,(request,response)=>{
   login.logout(request,response);

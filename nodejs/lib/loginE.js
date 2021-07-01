@@ -1,5 +1,6 @@
 var qs = require('querystring');
 var connection = require(`./db`);
+var session = require('express-session');
 const item = require(`./templeteE.js`);
 let author = '';
 const login =''
@@ -61,23 +62,27 @@ exports.process = function (request, response) {
                 response.writeHead(200)
             } else {
                 const id = results[0].id;
+                console.log(results[0].id,name,password)
                 loginResult = `
                 <script>
                     alert('Hello ${name}');
                     location.href='/' ;
                 </script>                
-                `;
-                response.cookie(`id`,id);
-                response.cookie(`name`,name);
-                response.cookie(`password`,password);
+                `;                                               
+                request.session.idName = id;
+                request.session.name = name;
+                request.session.password = password;
                 response.redirect('/');
+
             }
         });
     });
 }
 exports.logout= function(request,response){
-    response.clearCookie(`id`);
-    response.clearCookie(`name`);
-    response.clearCookie(`password`);
-    response.redirect(`/login`);
+    request.session.destroy(function(){
+        response.redirect(`/login`);
+    });
+    // response.clearCookie(`id`);
+    // response.clearCookie(`name`);
+    // response.clearCookie(`password`);
 }

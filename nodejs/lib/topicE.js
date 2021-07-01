@@ -5,39 +5,52 @@ const connection = require(`./db`);
 const item = require(`./templeteE.js`);
 let author = ``;
 let control = '';
-let isUser =false;
+let isUser = false;
 
-function getUserName(request,response){      
-    const rs= request.cookies;     
-    if(rs.name){
+function getUserName(request, response) {
+    const rs = request.session;
+    if (rs.name) {
         login = `Hello ${rs.name} 
-        <a href = "/logout">Logout</a>
-        ` ;
-        isUser= true;
-    }else {
-        login =`<a href="/login">Login</a>`;
+         <a href = "/logout">Logout</a>
+       ` ;
+        isUser = true;
+    } else {
+        login = `<a href="/login">Login</a>`;
         isUser = false;
     }
     return rs;
 }
 
+
+    // const rs = request.cookies;
+    // if (rs.name) {
+    //     login = `Hello ${rs.name} 
+    //     <a href = "/logout">Logout</a>
+    //     ` ;
+    //     isUser = true;
+    // } else {
+    //     login = `<a href="/login">Login</a>`;
+    //     isUser = false;
+    // }
+    // return rs;
+
 exports.home = function (request, response) {
-    getUserName(request,response);   
-    author =``;     
+    getUserName(request, response);
+    author = ``;
     control = `<a href = "/create">create</a> `;
     var sql = `SELECT * FROM topic`;
     connection.query(sql, (err, results) => {
         if (err) { throw err }
         title = 'Welcome';
         data = 'Hello World Welcome';
-        var list = item.list(results);       
-        var html = item.createTemplet(title, data, list, control, author ,login);
+        var list = item.list(results);
+        var html = item.createTemplet(title, data, list, control, author, login);
         response.send(html);
     });
 }
 exports.page = function (request, response, pageId) {
-    const rs = getUserName(request,response);
-    control ='';
+    const rs = getUserName(request, response);
+    control = '';
     const update = `
     <a href = "/update/${pageId}">update</a> 
     <form action="/delete_process" method="POST">
@@ -45,9 +58,6 @@ exports.page = function (request, response, pageId) {
       <input type="submit"  value ="delete">   
   </form>
     `;
-    
-
-
     var sql = `SELECT * FROM topic`;
     connection.query(sql, function (err, results) {
         if (err) {
@@ -60,18 +70,31 @@ exports.page = function (request, response, pageId) {
                     throw err2;
                 }
                 else {
-                    title = topic[0].title;
-                    data = topic[0].description;
-                    author = `..by ${topic[0].name}`;
-                    author_id = topic[0].author_id;
+                    if (topic[0] === undefined) {
+                        var script = `
+                        <script>
+                            alert("We can't found it");
+                            location.href ='/';
+                        </script>
+                        `;
+                        response.status(404).send(script);
+                    } else {
+                        console.log(topic[0]);
+                        title = topic[0].title;
+                        data = topic[0].description;
+                        author = `..by ${topic[0].name}`;
+                        author_id = topic[0].author_id;
 
-                    if(rs.id === String(author_id)){
-                        control = update;
+                        if (rs.idName === author_id) {
+                            control = update;
+                        }
+
+                        var list = item.list(results);
+                        var html = item.createTemplet(title, data, list, control, author, login);
+                        response.send(html);
+
                     }
 
-                    var list = item.list(results);
-                    var html = item.createTemplet(title, data, list, control, author ,login);
-                    response.send(html);
                 }
 
             });
@@ -80,27 +103,30 @@ exports.page = function (request, response, pageId) {
     })
 }
 exports.create = function (request, response) {
-    const rs = getUserName(request,response); 
-    if(isUser){
+    const rs = getUserName(request, response);
+    if (isUser) {
         title = "Create";
-    data = `
+        data = `
     <form action="/create_process" method="POST">
-    <input type ="hidden" name="author_id" value ="${rs.id}">
+    <input type ="hidden" name="author_id" value ="${rs.idName}">
     <p><input type="text" name="title"  placeholder="title" ></p>
     <p><textarea name="content" cols="30" rows="10" placeholder="여기"></textarea></p>
     <p><input type="submit" value="submit"></p>
     </form>
     `;
-    var sql = `SELECT * FROM topic`;
-    connection.query(sql, function (err, results) {
-        var list = item.list(results);
-        var html = item.createTemplet(title, data, list, control, author ,login);
-        response.send(html);
-    });
-    }else{
-        response.redirect(`/login`)
+        var sql = `SELECT * FROM topic`;
+        connection.query(sql, function (err, results) {
+            var list = item.list(results);
+            var html = item.createTemplet(title, data, list, control, author, login);
+            response.send(html);
+        });
+    } else {
+        response.writeHead(200);
+        response.end(`<script>alert('Login Please');
+        location.href = "/login";
+        </script>`);
     }
-    
+
 }
 exports.create_process = function (request, response) {
     var body = '';
@@ -123,7 +149,7 @@ exports.create_process = function (request, response) {
     });
 }
 exports.update = function (request, response, pageId) {
-    getUserName(request,response);
+    getUserName(request, response);
     const _url = request.url;
     const queryData = url.parse(_url, true).query;
     let author = ``;
@@ -147,7 +173,7 @@ exports.update = function (request, response, pageId) {
     <p><input type="submit" value="submit"></p>
     </form>`
             var list = item.list(topics);
-            var html = item.createTemplet(title, data, list, control, author ,login);
+            var html = item.createTemplet(title, data, list, control, author, login);
             response.send(html);
         });
     });
