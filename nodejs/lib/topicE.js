@@ -8,36 +8,34 @@ let control = '';
 let isUser = false;
 
 function getUserName(request, response) {
-    const rs = request.session;
-    if (rs.name) {
+    const rs = request.user;
+    console.log(rs);
+    if (rs) {
         login = `Hello ${rs.name} 
-         <a href = "/logout">Logout</a>
+         <a href = "/user/logout">Logout</a>
        ` ;
         isUser = true;
     } else {
-        login = `<a href="/login">Login</a>`;
+        login = `<a href="/user/login">Login</a>`;
         isUser = false;
     }
     return rs;
-}
-
-
-    // const rs = request.cookies;
-    // if (rs.name) {
-    //     login = `Hello ${rs.name} 
-    //     <a href = "/logout">Logout</a>
-    //     ` ;
-    //     isUser = true;
-    // } else {
-    //     login = `<a href="/login">Login</a>`;
-    //     isUser = false;
-    // }
-    // return rs;
+}    // const rs = request.cookies;
+// if (rs.name) {
+//     login = `Hello ${rs.name} 
+//     <a href = "/logout">Logout</a>
+//     ` ;
+//     isUser = true;
+// } else {
+//     login = `<a href="/login">Login</a>`;
+//     isUser = false;
+// }
+// return rs;
 
 exports.home = function (request, response) {
     getUserName(request, response);
     author = ``;
-    control = `<a href = "/create">create</a> `;
+    control = `<a href = "/page/create">create</a> `;
     var sql = `SELECT * FROM topic`;
     connection.query(sql, (err, results) => {
         if (err) { throw err }
@@ -52,8 +50,8 @@ exports.page = function (request, response, pageId) {
     const rs = getUserName(request, response);
     control = '';
     const update = `
-    <a href = "/update/${pageId}">update</a> 
-    <form action="/delete_process" method="POST">
+    <a href = "/page/update/${pageId}">update</a> 
+    <form action="/page/delete_process" method="POST">
       <input type="hidden" name="id" value ="${pageId}">
       <input type="submit"  value ="delete">   
   </form>
@@ -79,16 +77,16 @@ exports.page = function (request, response, pageId) {
                         `;
                         response.status(404).send(script);
                     } else {
-                        console.log(topic[0]);
                         title = topic[0].title;
                         data = topic[0].description;
                         author = `..by ${topic[0].name}`;
                         author_id = topic[0].author_id;
 
-                        if (rs.idName === author_id) {
-                            control = update;
-                        }
-
+                        if (rs) {
+                            if (rs.id === author_id) {
+                                control = update;
+                            }
+                        } 
                         var list = item.list(results);
                         var html = item.createTemplet(title, data, list, control, author, login);
                         response.send(html);
@@ -107,8 +105,8 @@ exports.create = function (request, response) {
     if (isUser) {
         title = "Create";
         data = `
-    <form action="/create_process" method="POST">
-    <input type ="hidden" name="author_id" value ="${rs.idName}">
+    <form action="/page/create_process" method="POST">
+    <input type ="hidden" name="author_id" value ="${rs.id}">
     <p><input type="text" name="title"  placeholder="title" ></p>
     <p><textarea name="content" cols="30" rows="10" placeholder="여기"></textarea></p>
     <p><input type="submit" value="submit"></p>
@@ -128,16 +126,11 @@ exports.create = function (request, response) {
     }
 
 }
-exports.create_process = function (request, response) {
-    var body = '';
-    request.on('data', function (data) {
-        body += data;
-    });
-    request.on('end', function () {
-        var post = qs.parse(body);
-        author_id = post.author_id;
-        title = post.title;
-        content = post.content;
+exports.create_process = function (request, response) {    
+    const body = request.body;   
+        author_id = body.author_id;
+        title = body.title;
+        content = body.content;
 
         sql = `INSERT INTO topic (title,description,created,author_id) VALUES (?,?,now(),?)`
         connection.query(sql, [title, content, author_id], function (err, results) {
@@ -145,8 +138,7 @@ exports.create_process = function (request, response) {
                 throw err;
             }
             response.redirect(`/page/${results.insertId}`);
-        })
-    });
+        });    
 }
 exports.update = function (request, response, pageId) {
     getUserName(request, response);
@@ -166,7 +158,7 @@ exports.update = function (request, response, pageId) {
             var title = results[0].title;
             author = results[0].name;
             data = `
-    <form action="/update_process" method="POST">
+    <form action="/page/update_process" method="POST">
     <p><input type="hidden" name="id" id="" value="${pageId}" ></p>
     <p><input type="text" name="title" id="" placeholder="${title}" value ="${title}"></p>
     <p><textarea name="content" id="" cols="30" rows="10" placeholder="${description}" value="${description}">${description}</textarea></p>
@@ -180,36 +172,23 @@ exports.update = function (request, response, pageId) {
 
 }
 exports.update_process = function (request, response) {
-    var body = '';
-    request.on('data', function (data) {
-        body += data;
-    });
-    request.on('end', function () {
-        var post = qs.parse(body);
-        var id = post.id;
-        var title = post.title;
-        var content = post.content;
+    const body = request.body;
+        var id = body.id;
+        var title = body.title;
+        var content = body.content;
 
         sql = `UPDATE topic SET title = ?, description= ? WHERE id=? `;
         connection.query(sql, [title, content, id], function (err, results) {
             if (err) { throw err }
             response.redirect(`/page/${id}`);
         })
-    });
 }
 exports.delete_process = function (request, response) {
-    var body = '';
-    request.on('data', function (data) {
-        body += data;
-    })
-    request.on('end', function () {
-        post = qs.parse(body);
-        var id = post.id;
-
+    const body = request.body;          
+        var id = body.id;
         sql = `DELETE FROM topic WHERE id=?`;
         connection.query(sql, [id], function (err, results) {
             response.redirect(`/`);
         });
-    })
-
+   
 }

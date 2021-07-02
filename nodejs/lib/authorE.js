@@ -11,7 +11,7 @@ exports.author = function (request, response ,next) {
         if (err) {
             next(err);
         }
-        form = `<a href = "/create_author">CREATE AUTHOR</a>`
+        form = `<a href = "/author/create">CREATE AUTHOR</a>`
         var list = item.authorList(results);
         var html = item.authorTemplete(list, form);
 
@@ -32,7 +32,7 @@ exports.update = function (request, response, authorId ,next) {
                 next(err2);
             }
             form = `
-            <form action="/author_update_process" method="POST">
+            <form action="/author/update_process" method="POST">
             <input type="hidden" name="id"  value ="${authorId}"></br>
             <input type="text" name="name" placeholder="${author[0].name}"  value ="${author[0].name}"></br>
             <textarea name="profile" vlaue ="${author[0].profile}" >${author[0].profile}</textarea></br>
@@ -46,15 +46,10 @@ exports.update = function (request, response, authorId ,next) {
     })
 }
 exports.update_process = function (request, response , next) {
-    var body = ``;
-    request.on(`data`, function (data) {
-        body += data;
-    });
-    request.on(`end`, function () {
-        post = qs.parse(body);
-        var id = post.id;
-        var name = post.name;
-        var profile = post.profile;
+    const body = request.body;
+        var id = body.id;
+        var name = body.name;
+        var profile =body.profile;
 
         sql = `update author SET name =?, profile= ? WHERE id = ? `
         connection.query(sql, [name, profile, id], function (err, results) {
@@ -62,12 +57,11 @@ exports.update_process = function (request, response , next) {
                 next(err);
             }
             response.redirect(`/author`);
-        });
-    });
+        });   
 }
 exports.create = function (requset, response) {
     form = `
-    <form action="/author_create_process" method="POST">
+    <form action="/author/create_process" method="POST">
     <input type="text" name="name" placeholder="name" value =""></br>
     <input type="text" name="password" placeholder="password" value =""></br></br>
     <textarea name="profile" placeholder="profile" ></textarea></br>
@@ -79,36 +73,25 @@ exports.create = function (requset, response) {
 }
 
 exports.create_process = function (request, response , next) {
-    var body = ``;
-    request.on(`data`, function (data) {
-        body += data;
-    })
-    request.on(`end`, function () {
-        post = qs.parse(body);
-        var name = post.name;
-        var profile = post.profile;
-        var password = post.password
+    const body = request.body;    
+        var name = body.name;
+        var profile = body.profile;
+        var password = body.password
 
         sql = `INSERT INTO author (name,profile,password) VALUES (?,?,?)`
         connection.query(sql, [name, profile,password], function (err, results) {
             if (err) { next(err); }
             response.redirect(`/author`);
-        });
-    });
+        });   
 }
 exports.delete = function (request, response , next) {
-    var body = '';
-    request.on(`data`, function (data) {
-        body += data;
-    });
-    request.on(`end`, function () {
-        post = qs.parse(body);
-        var id = post.id;
+        const body = request.body;
+        var id = body.id;
 
         sql = `DELETE FROM author WHERE id =?`;
         connection.query(sql, [id], function (err, results) {
             if (err) { next(err); }
             response.redirect(`/author`);
         });
-    })
+    
 }

@@ -3,7 +3,7 @@ module.exports = {
       
     const sanitizeHtml = require('sanitize-html');
     const sanitizedData = sanitizeHtml(data, {
-      allowedTags: sanitizeHtml.defaults.allowedTags.concat(['form', 'input', 'p', 'textarea']),
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat(['form', 'input', 'p', 'textarea',`label`]),
       disallowedTagsMode: 'escape',
       allowedAttributes: {
         input: ['type', 'name', 'placeholder', 'value'],
@@ -67,10 +67,10 @@ module.exports = {
         <td>${results[i].name}</td>
         <td>${results[i].profile}</td>
         <td>
-          <a href="/update_author/${results[i].id}">update</a>
+          <a href="/author/update/${results[i].id}">update</a>
         </td>
         <td>
-          <form action="/delete_author" method="post">
+          <form action="/author/delete" method="post">
             <input type="hidden" name="id" value="${results[i].id}">
             <input type="submit" value="Delete">
           </form>

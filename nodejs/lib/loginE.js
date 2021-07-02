@@ -3,31 +3,39 @@ var connection = require(`./db`);
 var session = require('express-session');
 const item = require(`./templeteE.js`);
 let author = '';
-const login =''
+const login = ''
+
 
 exports.login = function (request, response) {
-  
-    control = `<a href = "/create">create</a> `;
+    control = `<a href = "/page/create">create</a> `;
     var sql = `SELECT * FROM topic`;
     connection.query(sql, (err, results) => {
         if (err) { throw err }
 
         title = 'Welcome';
         data = `
-        <form action="/login_process" method="POST">
-        <input type="text" name="name" placeholder="id" value ="">
-        <input type="password" name="password" placeholder="password" value ="">
-        
-        <input type="submit" value="Login">
-      </form>
+        <form action="/user/login_process" method="post">
+    <div>
+        <label>Username:</label>
+        <input type="text" name="username"/>
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password"/>
+    </div>
+    <div>
+        <input type="submit" value="Log In"/>
+    </div>
+</form>
         `;
-
         var list = item.list(results);
         var html = item.createTemplet(title, data, list, control, author, login);
         response.send(html);
     });
 };
 
+
+/*
 exports.process = function (request, response) {
     var body = ``;
     request.on('data', function (data) {
@@ -35,8 +43,8 @@ exports.process = function (request, response) {
     });
     request.on('end', function () {
         post = qs.parse(body);
-        
-        const name = post.name;
+
+        const name = post.username;
         const password = post.password;
         let loginResult = '';
 
@@ -51,38 +59,50 @@ exports.process = function (request, response) {
                     alert('No iD');
                     location.href='/login' ;
                 </script>`
-                response.end(loginResult);
                 response.writeHead(200);
+                response.end(loginResult);
             } else if (results[0].password !== password) {
                 loginResult = `<script>
                 alert('wrong password');
                 location.href='/login' ;
                  </script>`
+                response.writeHead(200);
                 response.end(loginResult);
-                response.writeHead(200)
             } else {
                 const id = results[0].id;
-                console.log(results[0].id,name,password)
+                console.log(results[0].id, name, password)
                 loginResult = `
                 <script>
                     alert('Hello ${name}');
                     location.href='/' ;
                 </script>                
-                `;                                               
+                `;
                 request.session.idName = id;
                 request.session.name = name;
                 request.session.password = password;
-                response.redirect('/');
-
+                request.session.save(function () {
+                    response.redirect('/');
+                });
             }
         });
     });
 }
-exports.logout= function(request,response){
-    request.session.destroy(function(){
-        response.redirect(`/login`);
-    });
+*/
+exports.logout = function (request, response) {
+    // request.session.destroy(function () {
+    //     response.redirect(`/login`);
+    // });
     // response.clearCookie(`id`);
     // response.clearCookie(`name`);
     // response.clearCookie(`password`);
+
+    // request.logout();
+    // request.session.destroy(function () {
+    //     response.redirect(`/login`);
+    // });
+    request.logout();
+    request.session.save(function(){
+        response.redirect(`/user/login`);
+    })
+ 
 }

@@ -6,6 +6,7 @@ var FileStore = require('session-file-store')(session);
 var app = express()
 
 app.use(session({
+  HttpOnly:true,
   store: new FileStore(),
   secret: 'keyboard cat',
   resave: false,
