@@ -1,0 +1,9 @@
+const newTitle = post.title;
+                    const content = post.content;
+                    const senitizeContent = content.replace(/&lt;/g,"&lt;").replace(/&gt;/g,"&gt;");
+                    fs.rename(`data/${title}`, `data/${newTitle}`, function () {
+                        fs.writeFile(`data/${newTitle}`, senitizeContent, 'utf-8', function (err) {
+                            response.writeHead(302, { Location: `/?id=${title}` });
+                            response.end("success");
+                        })
+                    })

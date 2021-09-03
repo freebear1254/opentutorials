@@ -4,6 +4,7 @@ const fs = require('fs');
 const qs = require('querystring');
 
 const url = require('url');
+const path = require('path');
 
 const tem = require('./modules/template');
 const port = 3000;
@@ -17,24 +18,26 @@ const app = http.createServer(function (request, response) {
     //console.log(url.parse(requestUrl, true));
     const pathName = url.parse(requestUrl, true).pathname;
     let title = queryData.id;
+    
     const dataFolder = './data';
 
 
     fs.readdir(dataFolder, function (err, fileList) {
-        let linkOption ='linkOption';
-        list =tem.setList(fileList);
+        let linkOption = 'linkOption';
+        list = tem.setList(fileList);
         if (pathName === '/') {
             if (title === undefined) {
                 title = "Welcome";
                 description = 'hello welcome';
                 linkOption = 'create';
-                template = tem.setTemplate(title, list, description,linkOption);
+                template = tem.setTemplate(title, list, description, linkOption);
                 response.writeHead(200);
                 response.end(template);
             } else {
-                fs.readFile(`data/${title}`, 'utf-8', function (err, description) {
-                    linkOption='update'
-                    template = tem.setTemplate(title, list, description,linkOption);
+                parserPath = path.parse(queryData.id).base;
+                fs.readFile(`data/${parserPath}`, 'utf-8', function (err, description) {
+                    linkOption = 'update'
+                    template = tem.setTemplate(title, list, description, linkOption);
                     response.writeHead(200);
                     response.end(template);
                 })
@@ -53,7 +56,7 @@ const app = http.createServer(function (request, response) {
                 </div>
                 `;
 
-                template = tem.setTemplate(title, list, description,linkOption)
+                template = tem.setTemplate(title, list, description, linkOption)
                 response.writeHead(200);
                 response.end(template);
             } else if (request.method === 'POST') {
@@ -69,16 +72,18 @@ const app = http.createServer(function (request, response) {
 
                     const title = post.title;
                     const content = post.content;
-                    fs.writeFile(`data/${title}`, content, 'utf-8', function (err) {
+                    const senitizeContent = content.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                    fs.writeFile(`data/${title}`, senitizeContent, 'utf-8', function (err) {
                         response.writeHead(302, { Location: `/?id=${title}` });
                         response.end("success");
                     })
                 });
             }
         } else if (pathName === '/update') {
-            
+
             if (request.method === 'GET') {
-                fs.readFile(`data/${title}`, 'utf-8', function (err, fileData) {
+                parserPath = path.parse(queryData.id).base;
+                fs.readFile(`data/${parserPath}`, 'utf-8', function (err, fileData) {
                     description = `
                     <div>
                     <form action="/update?id=${title}"  method="post" >
@@ -88,7 +93,7 @@ const app = http.createServer(function (request, response) {
                     </form>    
                     </div>
                     `;
-                    template = tem.setTemplate(title, list, description,linkOption)
+                    template = tem.setTemplate(title, list, description, linkOption)
                     response.writeHead(200);
                     response.end(template);
                 })
@@ -103,20 +108,21 @@ const app = http.createServer(function (request, response) {
 
                     const newTitle = post.title;
                     const content = post.content;
-
-                    fs.rename(`data/${title}`,`data/${newTitle}`,function(){
-                        fs.writeFile(`data/${newTitle}`, content, 'utf-8', function (err) {
+                    const senitizeContent = content.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                    fs.rename(`data/${title}`, `data/${newTitle}`, function () {
+                        fs.writeFile(`data/${newTitle}`, senitizeContent, 'utf-8', function (err) {
                             response.writeHead(302, { Location: `/?id=${title}` });
                             response.end("success");
                         })
                     })
-                   
+
                 });
             }
-        }else if(pathName === '/delete'){
-            fs.unlink(`data/${title}`,function(err){
+        } else if (pathName === '/delete') {
+            parserPath = path.parse(queryData.id).base;
+            fs.unlink(`data/${parserPath}`, function (err) {
                 logger.info(`delete file : ${title}`);
-                response.writeHead(302,{Location:`/`});
+                response.writeHead(302, { Location: `/` });
                 response.end("delete Success");
             })
         }
