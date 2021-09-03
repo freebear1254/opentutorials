@@ -1,5 +1,7 @@
 const tem ={
     setTemplate :function (title, list, description,linkOption) {    
+
+
         if (linkOption === 'create') {
             linkOption = `<a href ="/create">create</a>`;
         } else if(linkOption === 'update'){
@@ -7,6 +9,8 @@ const tem ={
         }else{
             linkOption ='';
         }
+
+        const seniDescription = description.replace(/<script>/g,"&lt;script$gt;").replace(/<\/script>/g,"&lt;\/script$gt;");
     
         return `    <!doctype html>
                     <html>
@@ -22,7 +26,7 @@ const tem ={
                     ${linkOption}
                     <h2>${title}</h2>
                     <div>
-                    ${description}
+                    ${seniDescription}
                     </div>
                     </body>
                     </html>
