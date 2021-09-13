@@ -2,25 +2,28 @@ const { logger } = require('./config/winston')
 const http = require('http');
 const fs = require('fs');
 const qs = require('querystring');
-
 const url = require('url');
 const path = require('path');
-
 const tem = require('./modules/template');
 const port = 3000;
 
+const mysql = require('mysql');
+const connection = mysql.createConnection({
+    host :'localhost',
+    user: 'nodejs',
+    password : 'sks1254',
+    database: 'nodejs'
+});
+
+connection.connect();
 
 
 const app = http.createServer(function (request, response) {
     const requestUrl = request.url;
-
     const queryData = url.parse(requestUrl, true).query;
-    //console.log(url.parse(requestUrl, true));
     const pathName = url.parse(requestUrl, true).pathname;
-    let title = queryData.id;
-    
+    let title = queryData.id;    
     const dataFolder = './data';
-
 
     fs.readdir(dataFolder, function (err, fileList) {
         let linkOption = 'linkOption';

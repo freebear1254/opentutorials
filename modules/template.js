@@ -1,16 +1,34 @@
 const tem ={
-    setTemplate :function (title, list, description,linkOption) {    
-
-
+    setTemplate :function (id,user,title, list, description,linkOption) {    
         if (linkOption === 'create') {
-            linkOption = `<a href ="/create">create</a>`;
+            linkOption = `<a href ="/topic/create">create</a>`;
         } else if(linkOption === 'update'){
-            linkOption = `<a href ="/update?id=${title}">update</a>     <a href ="/delete?id=${title}">delete</a>`;
+            linkOption = `<a href ="/topic/update?id=${id}">update</a>  
+            <form action="/topic/delete"  method="post" >
+                <input type="hidden" name="id" value ="${id}">               
+                <input type="submit" value="delete">
+            </form>  `;
         }else{
             linkOption ='';
         }
 
-        const seniDescription = description.replace(/<script>/g,"&lt;script$gt;").replace(/<\/script>/g,"&lt;\/script$gt;");
+        let isLogin =``;
+
+        if(user === null){
+            isLogin = ` <div>
+                <form action="/topic/login"  method="post" >
+                    <input type="text" name="email" placeholder = 'email'>
+                    <input type="password" name = "password" placeholder = "password">
+                    <input type="submit" value="Login">
+                </form>    
+                </div>`
+        }else{
+            isLogin =`<div><h2>Hello ${user.email}</h2></div><a href = /topic/logout>Log Out</a>`;
+        }
+
+
+      
+       const senitizerDescription = description.replace(/<script>/g,"&lt;script$gt;").replace(/<\/script>/g,"&lt;\/script$gt;");
     
         return `    <!doctype html>
                     <html>
@@ -19,23 +37,24 @@ const tem ={
                     <meta charset="utf-8">
                     </head>
                     <body> 
-                    <h1><a href="/">WEB</a></h1>
+                    <h1><a href="/topic">WEB</a></h1>
+                    ${isLogin}
                     <ol>
                     ${list}                
                     </ol>
                     ${linkOption}
                     <h2>${title}</h2>
                     <div>
-                    ${seniDescription}
+                    ${senitizerDescription}
                     </div>
                     </body>
                     </html>
                     `;
     },
-    setList :function (fileList){
+    setList :function (topics){
         let list = '';
-        fileList.forEach(function (fileName) {
-            list = list + `<li><a href="/?id=${fileName}">${fileName}</a></li>`
+        topics.forEach(function (topic) {
+            list = list + `<li><a href="/topic/?id=${topic.id}">${topic.title}</a></li>`
         });
         return list;
     }
