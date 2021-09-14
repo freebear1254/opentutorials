@@ -1,8 +1,7 @@
-const { logger } = require('../config/winston')
+const { logger } = require('../config/winston');
 const url = require('url');
 const tem = require('./template');
 const db = require('./mysql');
-
 
 let title = '';
 let description = '';
@@ -10,15 +9,21 @@ let list = '';
 let linkOption = "linkOption";
 let template = '';
 
+// const cookie = require('cookie');
+// let cookies;
+// function isLogin(request) {
+//     if (request.headers.cookie !== undefined) {
+//         cookies = cookie.parse(request.headers.cookie);
+//         return cookies;
+//     } else {
+//         return null;
+//     }
+// }
 
-
-const cookie = require('cookie');
-let cookies;
-function isLogin(request) {
-    if (request.headers.cookie !== undefined) {
-        cookies = cookie.parse(request.headers.cookie);
-        return cookies;
-    } else {
+function isLogin(request){
+    if(request.session.isLogin === true){
+        return request.session;
+    }else{
         return null;
     }
 }
@@ -31,7 +36,7 @@ exports.mainPage = function (request, response) {
     if (queryData.id === undefined) {
         title = "Welcome";
         description = 'hello welcome';
-        if (user !== null) {
+        if(user !==null &&user.isLogin === true){
             linkOption = 'create';
         }
         list = '';
@@ -62,8 +67,7 @@ exports.mainPage = function (request, response) {
                     } else {
                         description = '내용이 없는 글입니다. ';
                     }
-
-                    if (result[0].author_id === parseInt(user.userId)) {
+                    if(user !== null && result[0].author_id ===parseInt(user.userId) ){
                         linkOption = 'update';
                     }
 
@@ -201,25 +205,28 @@ exports.login = function (request, response) {
     </script>`;
 
     db.query("SELECT * FROM user WHERE email = ?", [email], function (err, user) {
+
         logger.info(`user ID :${user[0].id}`);
         if (err) {
             logger.error(err);
             throw err;
         } else {
-            if (user[0].id === undefined) {
+            if (user[0].id === undefined) {// no id
                 response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
                 response.end(NoUser);
-            } else if (user[0].password !== password) {
+            } else if (user[0].password !== password) {// no password
                 response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
                 response.end(NoPass);
-            } else if (user[0].password === password) {
+            } else if (user[0].password === password) {//correct
+                request.session.isLogin =true;
+                request.session.userName = email;
+                request.session.userId = user[0].id;
+                logger.info(`is Login ? :${request.session.isLogin}`)
                 response.writeHead(302, {
-                    Location: '/topic',
-                    'set-cookie': [
-                        `email=${email}`,
-                        `userId=${user[0].id}`
-                    ]
-                });
+                    Location: '/topic'
+                }
+                );
+                
                 response.end("로그인 성공");
             }
         }
@@ -227,12 +234,11 @@ exports.login = function (request, response) {
     })
 }
 exports.logOut = function (request, response) {
-    response.writeHead(302, {
-        Location: '/topic',
-        'set-cookie': [
-            'userId=; Max-Age =0',
-            'email=; Max-Age =0'
-        ]
+
+    request.session.destroy(function () {
+        response.writeHead(302, { Location: '/topic' });
+        response.end("Logout");
     });
-    response.end("logOut");
+
+
 }

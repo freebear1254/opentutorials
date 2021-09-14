@@ -23,7 +23,7 @@ const tem ={
                 </form>    
                 </div>`
         }else{
-            isLogin =`<div><h2>Hello ${user.email}</h2></div><a href = /topic/logout>Log Out</a>`;
+            isLogin =`<div><h2>Hello ${user.userName}</h2></div><a href = /topic/logout>Log Out</a>`;
         }
 
 
