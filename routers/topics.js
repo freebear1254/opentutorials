@@ -31,11 +31,13 @@ router.all('/update', urlencodedParser, (request, response) => {
 router.all('/delete', urlencodedParser, (request, response) => {
     topic.delete(request, response)
 });
-router.post('/login', urlencodedParser, (request, response) => { 
-    topic.login(request, response);
-});
+// router.post('/login', urlencodedParser, (request, response) => { 
+//     topic.login(request, response);
+// });
+router.post('/login',topic.login);
+
 router.all('/logout', (request, response) => {
-    topic.logOut(request, response);
+    topic.logOut(request, response );
 })
 
 

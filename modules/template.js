@@ -12,18 +12,24 @@ const tem ={
             linkOption ='';
         }
 
-        let isLogin =``;
+        let isLogin = ``;
 
-        if(user === null){
-            isLogin = ` <div>
-                <form action="/topic/login"  method="post" >
-                    <input type="text" name="email" placeholder = 'email'>
-                    <input type="password" name = "password" placeholder = "password">
-                    <input type="submit" value="Login">
-                </form>    
-                </div>`
-        }else{
-            isLogin =`<div><h2>Hello ${user.userName}</h2></div><a href = /topic/logout>Log Out</a>`;
+        if (user === null) {
+            isLogin = ` <form action="/topic/login" method="post">
+                            <div>
+                                <label>Username:</label>
+                                <input type="text" name="username" placeholder="email"/>
+                            </div>
+                            <div>
+                                <label>Password:</label>
+                                <input type="password" name="password" placeholder = "password"/>
+                            </div>
+                            <div>
+                                <input type="submit" value="Log In"/>
+                            </div>
+                        </form>`
+        } else {
+            isLogin = `<div><h2>Hello ${user.userName}</h2></div><a href = /topic/logout>Log Out</a>`;
         }
 
 

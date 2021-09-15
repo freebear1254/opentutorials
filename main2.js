@@ -12,12 +12,17 @@ const FileStore = require('session-file-store')(session);
 //db.connect();
 
 app.use(session({
+    HttpOnly: true,
+    secure: true,
     secret: 'keyboard cat',//secret 옵션
     resave: false,//session 값이 바뀌면 저장
     saveUninitialized: true,//session 이 필요하기 전까지 구동하지 않는다.
     //store: new FileStore() //session 저장방법Compatible Session Stores
-  }));
+}));
 
+
+// var flash=require("connect-flash");
+// app.use(flash());
 
 const topicRouter = require('./routers/topics');
 const cookie = require('./routers/cookies')
@@ -47,25 +52,6 @@ app.use((request,response)=>{
 })
 
 
-// const app = http.createServer(function (request, response) {
-//     const requestUrl = request.url;
-//     const pathName = url.parse(requestUrl, true).pathname;
-
-//     if (pathName === '/') {
-//         topic.mainPage(request,response);
-//     } else if (pathName === '/create') {
-//         topic.create(request,response);
-//     } else if (pathName === '/update') {
-//         topic.update(request,response)
-//     } else if (pathName === '/delete') {
-//         topic.delete(request,response)
-//     }
-//     else {
-//         response.writeHead(404);
-//         response.end("Not found");
-//     }
-// }
-// );
 app.listen(port, () => {
     logger.info(`app listening at localhost:${port}`);
 });

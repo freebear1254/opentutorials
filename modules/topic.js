@@ -20,6 +20,14 @@ let template = '';
 //     }
 // }
 
+const passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy;
+
+passport.use(new LocalStrategy(
+function(username, password, done) {
+  }
+));
+
 function isLogin(request){
     if(request.session.isLogin === true){
         return request.session;
@@ -188,51 +196,61 @@ exports.delete = function (request, response) {
     });
 }
 
-exports.login = function (request, response) {
+//exports.login = function (request, response) {
 
-    const post = request.body;
-    const email = post.email;
-    const password = post.password;
+    // const post = request.body;
+    // const email = post.email;
+    // const password = post.password;
 
-    const NoUser = `<script  charset="utf-8">
-        alert("일치하는 아이디가 없습니다.");
-        window.history.back();
-    </script>`;
+    // const NoUser = `<script  charset="utf-8">
+    //     alert("일치하는 아이디가 없습니다.");
+    //     window.history.back();
+    // </script>`;
 
-    const NoPass = `<script  charset="utf-8">
-        alert("패스워드가 일치하지 않습니다");
-        window.history.back();
-    </script>`;
+    // const NoPass = `<script  charset="utf-8">
+    //     alert("패스워드가 일치하지 않습니다");
+    //     window.history.back();
+    // </script>`;
 
-    db.query("SELECT * FROM user WHERE email = ?", [email], function (err, user) {
 
-        logger.info(`user ID :${user[0].id}`);
-        if (err) {
-            logger.error(err);
-            throw err;
-        } else {
-            if (user[0].id === undefined) {// no id
-                response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                response.end(NoUser);
-            } else if (user[0].password !== password) {// no password
-                response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                response.end(NoPass);
-            } else if (user[0].password === password) {//correct
-                request.session.isLogin =true;
-                request.session.userName = email;
-                request.session.userId = user[0].id;
-                logger.info(`is Login ? :${request.session.isLogin}`)
-                response.writeHead(302, {
-                    Location: '/topic'
-                }
-                );
+    // db.query("SELECT * FROM user WHERE email = ?", [email], function (err, user) {
+
+    //     logger.info(`user ID :${user[0].id}`);
+    //     if (err) {
+    //         logger.error(err);
+    //         throw err;
+    //     } else {
+    //         if (user[0].id === undefined) {// no id
+    //             response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    //             response.end(NoUser);
+    //         } else if (user[0].password !== password) {// no password
+    //             response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    //             response.end(NoPass);
+    //         } else if (user[0].password === password) {//correct
+    //             request.session.isLogin =true;
+    //             request.session.userName = email;
+    //             request.session.userId = user[0].id;
+    //             logger.info(`is Login ? :${request.session.isLogin}`)
+    //             response.writeHead(302, {
+    //                 Location: '/topic'
+    //             }
+    //             );
                 
-                response.end("로그인 성공");
-            }
-        }
+    //             response.end("로그인 성공");
+    //         }
+    //     }
 
-    })
-}
+    // })
+
+   
+//}
+
+
+
+exports.login = passport.authenticate('local', {
+    successRedirect: '/success',
+    failureRedirect: '/fail'
+})
 exports.logOut = function (request, response) {
 
     request.session.destroy(function () {
